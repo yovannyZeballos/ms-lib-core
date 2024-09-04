@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
@@ -32,7 +33,7 @@ import reactor.core.publisher.Mono;
 @Component
 public class CustomWebFilter implements WebFilter {
 
-    @Value("${header.no-control.active:true}")
+    @Value("${header.no-control.active:false}")
     private boolean isHeaderNoControlActive;
 
     /**
@@ -63,6 +64,7 @@ public class CustomWebFilter implements WebFilter {
             log.warn(ConstantMessage.HEADERS_INVALID_MSG);
             ServerHttpResponse response = exchange.getResponse();
             response.setStatusCode(HttpStatus.BAD_REQUEST);
+            response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
             ErrorResponse errorResponse = ErrorResponse.builder()
                     .message(ConstantMessage.HEADERS_INVALID_MSG)
                     .details(Collections.singletonList(ConstantMessage.HEADERS_REQUIRED_TRANSACTION_ID))
@@ -107,7 +109,7 @@ public class CustomWebFilter implements WebFilter {
      */
     private boolean validateRequest(HttpHeaders headers) {
         Map<String, String> result = headers.entrySet().stream()
-                .filter(m -> (m.getKey().equalsIgnoreCase(HeadersConstant.HeaderRequest.TRANSACTION_ID.getKey())))
+                .filter(m -> (m.getKey().equalsIgnoreCase(HeadersConstant.TRANSACTION_ID)))
                 .collect(Collectors.toMap(Map.Entry::getKey, m -> m.getValue().get(0)));
         return (result.size() == 1);
     }

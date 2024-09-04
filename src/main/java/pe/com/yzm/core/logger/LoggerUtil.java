@@ -39,4 +39,16 @@ public class LoggerUtil {
         log.info(String.format(ConstantMessage.LOG_PARAMS_OUT_HEADERS_BODY, nameClass, lineNumber, transactionId, headers, body));
     }
 
+    /**
+     * Logs an error.
+     *
+     * @param transactionId the transaction ID
+     * @param error         the error
+     */
+    public static void logError(String transactionId, Throwable error) {
+        String nameClass = Thread.currentThread().getStackTrace()[2].getClassName();
+        Integer lineNumber = Thread.currentThread().getStackTrace()[2].getLineNumber();
+        log.error(String.format(ConstantMessage.LOG_ERROR, nameClass, lineNumber, transactionId, error));
+    }
+
 }

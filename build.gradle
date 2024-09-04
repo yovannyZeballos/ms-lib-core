@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'pe.com.yzm'
-version = '1.0.0'
+version = '1.0.3'
 
 java {
 	toolchain {
@@ -53,3 +53,4 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
