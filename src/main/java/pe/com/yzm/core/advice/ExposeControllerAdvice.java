@@ -10,7 +10,6 @@ import org.springframework.web.bind.support.WebExchangeBindException;
 import pe.com.yzm.core.constant.ConstantMessage;
 import pe.com.yzm.core.exception.BusinessException;
 import pe.com.yzm.core.model.ErrorResponse;
-import pe.com.yzm.core.model.Wrapper;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,48 +19,47 @@ import java.util.stream.Collectors;
 public class ExposeControllerAdvice {
 
   @ExceptionHandler(value = {BusinessException.class})
-  public ResponseEntity<Wrapper<ErrorResponse>> handleBusinessException(BusinessException exception) {
+  public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException exception) {
+
+      log.error("----  handleBusinessException: {} ----",exception.toString());
+
     final var errorResponse = ErrorResponse
         .builder()
         .message(exception.getMessage())
         .details(exception.getDetails())
         .build();
 
-    return new ResponseEntity<>(Wrapper.<ErrorResponse>builder()
-        .data(errorResponse)
-        .build(), exception.getHttpStatus());
+    return new ResponseEntity<>(errorResponse, exception.getHttpStatus());
   }
 
   @ExceptionHandler(value = {WebExchangeBindException.class})
   @ResponseStatus(HttpStatus.BAD_REQUEST)
-  public Wrapper<ErrorResponse> handleWebExchangeBindException(WebExchangeBindException exception) {
+  public ErrorResponse handleWebExchangeBindException(WebExchangeBindException exception) {
 
-    final var errorResponse = ErrorResponse
+      log.error("----  handleWebExchangeBindException: {} ----",exception.toString());
+
+    return ErrorResponse
         .builder()
         .message(exception.getReason())
         .details(exception.getFieldErrors().stream()
             .map(fieldError -> String.format("%s: %s", fieldError.getField(), fieldError.getDefaultMessage()))
             .collect(Collectors.toList()))
         .build();
-
-    return Wrapper.<ErrorResponse>builder()
-        .data(errorResponse)
-        .build();
   }
 
     @ExceptionHandler(value = {Exception.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Wrapper<ErrorResponse> handleException(Exception exception) {
+    public ErrorResponse handleException(Exception exception) {
+        log.error("----  handleException: {} ----",exception.toString());
 
-        final var errorResponse = ErrorResponse
+
+        return  ErrorResponse
                 .builder()
                 .message(ConstantMessage.GENERIC_MESSAGE)
                 .details(List.of(exception.getMessage()))
                 .build();
 
-        return Wrapper.<ErrorResponse>builder()
-                .data(errorResponse)
-                .build();
+
     }
 
 }

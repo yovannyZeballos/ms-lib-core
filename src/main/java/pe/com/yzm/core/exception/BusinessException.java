@@ -14,6 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@ToString
 public class BusinessException  extends Exception {
     private String message;
     private List<String> details;
