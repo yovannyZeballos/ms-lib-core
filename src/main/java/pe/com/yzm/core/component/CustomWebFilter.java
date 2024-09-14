@@ -1,5 +1,6 @@
 package pe.com.yzm.core.component;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -56,6 +58,20 @@ public class CustomWebFilter implements WebFilter {
         }
 
         HttpHeaders httpHeaders = exchange.getRequest().getHeaders();
+        HttpMethod httpMethod = exchange.getRequest().getMethod();
+
+        // Aquí puede especificar los métodos HTTP que desea procesar
+        List<HttpMethod> allowedMethods = Arrays.asList(
+                HttpMethod.GET,
+                HttpMethod.POST,
+                HttpMethod.PUT,
+                HttpMethod.DELETE,
+                HttpMethod.PATCH);
+
+        if (!allowedMethods.contains(httpMethod)) {
+            log.warn("Método HTTP no filtrado: {}", httpMethod);
+            return chain.filter(exchange);
+        }
 
         boolean isRequestHeaderValid = validateRequest(httpHeaders);
         if (isRequestHeaderValid) {
@@ -71,9 +87,7 @@ public class CustomWebFilter implements WebFilter {
                     .build();
             DataBuffer buffer = response
                     .bufferFactory()
-                    .wrap(new ObjectMapper().writeValueAsBytes(Wrapper.builder()
-                                    .data(errorResponse)
-                            .build()));
+                    .wrap(new ObjectMapper().writeValueAsBytes(errorResponse));
             return response.writeWith(Mono.just(buffer));
         }
         return chain.filter(exchange);
