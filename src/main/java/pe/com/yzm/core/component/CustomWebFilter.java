@@ -73,6 +73,14 @@ public class CustomWebFilter implements WebFilter {
             return chain.filter(exchange);
         }
 
+        final String path = exchange.getRequest().getURI().getPath();
+
+        for (UrlPermited urlPermited : UrlPermited.values()) {
+            if (path.contains(urlPermited.getValue())) {
+                return chain.filter(exchange);
+            }
+        }
+
         boolean isRequestHeaderValid = validateRequest(httpHeaders);
         if (isRequestHeaderValid) {
             log.info(ConstantMessage.HEADERS_VALID_MSG);
